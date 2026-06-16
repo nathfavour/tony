@@ -29,7 +29,11 @@ Tony is the definitive agentic operating system kernel and hypervisor layer. It 
 - **Manned Master**: High-trust controller (within `vish`) running on local physical metal with the master seed under direct supervision.
 - **Unmanned Workers**: Headless instances on cloud VPS, running in isolated Linux user namespaces and cgroups. They remain blind to the master seed, managing state via sharded MPC.
 
+## Development Philosophy: Workspace-First
+Tony is built using a **Go Workspace** (`go.work`) within its own repository. This architecture is designed to support extreme growth by allowing the kernel to be decomposed into independent, versioned modules (e.g., `pkg/ipc`, `pkg/crypto`) that remain tightly coupled during local development.
+
 ## Directory Structure
+- `go.work`: Orchestrates the internal module tree.
 
 - `pkg/ipc/`: Unix Domain Socket engine and `SCM_RIGHTS` implementation.
 - `pkg/crypto/`: Curve25519 unified identity and HD derivation.
