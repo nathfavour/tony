@@ -25,7 +25,9 @@ func TestScrub(t *testing.T) {
 }
 
 func TestScrubString(t *testing.T) {
-	s := "volatile secret"
+	// Create a string from a dynamic byte slice to ensure it's not in read-only memory.
+	b := []byte("volatile secret")
+	s := string(b)
 	ScrubString(&s)
 	for i := 0; i < len(s); i++ {
 		if s[i] != 0 {

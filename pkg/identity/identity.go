@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/nathfavour/tony/pkg/crypto"
+	"github.com/nathfavour/tony/pkg/memory"
 )
 
 // Manager handles hierarchical deterministic identity derivation.
@@ -30,10 +31,21 @@ func (m *Manager) DerivePersona(path string) (*crypto.Identity, error) {
 	currentSeed := m.MasterSeed
 
 	for _, part := range parts[1:] {
-		currentSeed = deriveChild(currentSeed, part)
+		nextSeed := deriveChild(currentSeed, part)
+		// If we are not at the root, we might want to scrub currentSeed if it was intermediate,
+		// but here it's passed by value and currentSeed is just a local copy.
+		currentSeed = nextSeed
 	}
 
-	return crypto.NewIdentity(currentSeed)
+	id, err := crypto.NewIdentity(currentSeed)
+	// Scrub the leaf seed after identity is created
+	memory.Scrub(currentSeed[:])
+	return id, err
+}
+
+// Destroy zeroes out the master seed.
+func (m *Manager) Destroy() {
+	memory.Scrub(m.MasterSeed[:])
 }
 
 // deriveChild computes a child seed from a parent seed and a label.

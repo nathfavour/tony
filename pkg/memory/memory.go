@@ -25,8 +25,18 @@ func Unlock(b []byte) error {
 
 // Scrub overwrites the given byte slice with zeros.
 func Scrub(b []byte) {
+	if b == nil {
+		return
+	}
 	for i := range b {
 		b[i] = 0
+	}
+}
+
+// ScrubByte overwrites the given byte with zero.
+func ScrubByte(b *byte) {
+	if b != nil {
+		*b = 0
 	}
 }
 

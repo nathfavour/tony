@@ -5,6 +5,7 @@ import (
 	"crypto/sha512"
 	"errors"
 
+	"github.com/nathfavour/tony/pkg/memory"
 	"golang.org/x/crypto/curve25519"
 )
 
@@ -29,8 +30,8 @@ func NewIdentity(seed [32]byte) (*Identity, error) {
 	x255Secret := [32]byte{}
 	copy(x255Secret[:], h[:32])
 	
-	// Clamping is usually done by the curve25519 library functions, 
-	// but for clarity we note it's derived from the seed hash.
+	// Scrub temporary hash
+	memory.Scrub(h[:])
 	
 	x255Public, err := curve25519.X25519(x255Secret[:], curve25519.Basepoint)
 	if err != nil {
@@ -46,6 +47,13 @@ func NewIdentity(seed [32]byte) (*Identity, error) {
 	copy(id.X255Public[:], x255Public)
 
 	return id, nil
+}
+
+// Destroy zeroes out the sensitive components of the identity.
+func (id *Identity) Destroy() {
+	memory.Scrub(id.Seed[:])
+	memory.Scrub(id.EdPrivate)
+	memory.Scrub(id.X255Secret[:])
 }
 
 // Sign signs a message using Ed25519.
